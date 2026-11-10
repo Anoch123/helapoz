@@ -4,24 +4,34 @@ import { useState } from "react";
 
 import type { ShopLoginInput } from "@/lib/validations/auth.validation";
 
+
 interface LoginResponse {
   success: boolean;
   message: string;
   errors?: Record<string, string[] | undefined>;
+
   data?: {
     user: {
       id: string;
       email: string | undefined;
     };
+
     shop: {
       id: string;
       shopCode: string;
       name: string;
       businessType: string;
     };
+
     membership: {
       id: string;
-      role: string;
+      role: "SHOP_ADMIN" | "SHOP_USER";
+    };
+
+    permissions: string[];
+
+    subscription: {
+      accessType: "ACTIVE" | "GRACE_PERIOD";
     };
   };
 }

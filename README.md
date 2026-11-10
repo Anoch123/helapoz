@@ -34,3 +34,37 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+
+
+
+<!-- "use client";
+
+import { LogOut } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { useShopLogout } from "@/hooks/useShopLogout";
+
+export function ShopLogoutButton() {
+  const { logout, isPending } = useShopLogout();
+
+  return (
+    <Button
+      variant="outline"
+      onClick={logout}
+      disabled={isPending}
+    >
+      <LogOut className="mr-2 h-4 w-4" />
+      {isPending ? "Logging out..." : "Logout"}
+    </Button>
+  );
+} -->
+
+
+<!-- Important: An authenticated user passing through the proxy is not automatically authorized to use the shop. We will implement that separately in the central server-side shop-session validation service. -->
+
+<!-- The next step is to verify the My Profile files and run npx tsc --noEmit, then fix any errors before proceeding.
+
+The current milestone is My Profile implementation. I'll keep track of which files have been provided versus which have actually been created and tested, so we don't accidentally treat unfinished work as completed. -->
