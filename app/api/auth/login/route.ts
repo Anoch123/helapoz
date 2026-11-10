@@ -55,16 +55,16 @@ function getSubscriptionMessage(reason: string): string {
   switch (reason) {
     case "NO_SUBSCRIPTION":
     case "PAYMENT_REQUIRED":
-      return "Your shop subscription payment is pending. Please contact Helpaz.";
+      return "Your shop subscription payment is pending. Please contact helapoz.";
 
     case "EXPIRED":
       return "Your shop subscription has expired. Please renew your subscription.";
 
     case "SUSPENDED":
-      return "Your shop subscription is suspended. Please contact Helpaz.";
+      return "Your shop subscription is suspended. Please contact helapoz.";
 
     case "CANCELLED":
-      return "Your shop subscription has been cancelled. Please contact Helpaz.";
+      return "Your shop subscription has been cancelled. Please contact helapoz.";
 
     case "CHECK_FAILED":
     case "INVALID_SUBSCRIPTION":
@@ -337,7 +337,7 @@ export async function POST(request: NextRequest) {
     // 10. Verify shop status.
     if (shop.status !== "ACTIVE") {
       return await rejectAuthenticated(
-        "This shop is currently unavailable. Please contact Helpaz.",
+        "This shop is currently unavailable. Please contact helapoz.",
         403
       );
     }

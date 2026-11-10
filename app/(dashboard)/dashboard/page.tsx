@@ -51,7 +51,7 @@ export default function Dashboard() {
         Dashboard
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Welcome to Helpaz POS.
+        Welcome to helapoz POS.
       </p>
     </div>
   );

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 
 import { shopLoginSchema } from "@/lib/validations/auth.validation";
 import { useShopLogin } from "@/hooks/useShopLogin";
+import { SupportDialog } from "@/components/widgets/helapoz-support/support-dialog";
 
 /* Shared shadcn Input styling: taller, rounded, indigo focus ring. */
 const inputClass =
@@ -189,9 +190,17 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <div className="mt-6 border-t pt-5 text-center text-sm text-muted-foreground">
-        Having trouble signing in? Contact your shop administrator.
-      </div>
+      <div className="mt-8">
+  <div className="flex items-center gap-3">
+    <span className="h-px flex-1 bg-border" />
+    <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+      Need help?
+    </span>
+    <span className="h-px flex-1 bg-border" />
+  </div>
+
+  <SupportDialog />
+</div>
     </div>
   );
 }

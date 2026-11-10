@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const SESSION_DURATION_SECONDS = 12 * 60 * 60;
 
 export const shopSessionConfig = {
-  cookieName: "helpaz_shop_session",
+  cookieName: "helapoz_shop_session",
   maxAge: SESSION_DURATION_SECONDS,
 };
 

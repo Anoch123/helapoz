@@ -5,38 +5,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Users,
   Store,
   Menu,
   X,
   LogOut,
   Loader2,
   ChevronRight,
-  UserRound,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useShopLogout } from "@/hooks/useShopLogout";
-import { BASICSYSTEMDATA } from "@/components/constants/helper-constants";
-
-const navigationItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Staff Management",
-    href: "/staff",
-    icon: Users,
-  },
-  {
-    title: "My Profile",
-    href: "/profile",
-    icon: UserRound,
-  },
-];
+import { BASICSYSTEMDATA, navigationItems } from "@/lib/constants/helper-constants";
 
 export default function PosSidebar() {
   const pathname = usePathname();
@@ -226,7 +205,7 @@ export default function PosSidebar() {
           </Button>
 
           <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            Helpaz POS
+            {BASICSYSTEMDATA.appName}
           </p>
         </div>
       </aside>

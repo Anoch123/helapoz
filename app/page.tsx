@@ -1,7 +1,7 @@
 import { BarChart3, Lock, Receipt, Store, Users } from "lucide-react";
 
-import { LoginForm } from "@/components/widgets/auth/login-form";
-import { BASICSYSTEMDATA } from "@/components/constants/helper-constants";
+import { LoginForm } from "@/components/form/auth/login-form";
+import { BASICSYSTEMDATA } from "@/lib/constants/helper-constants";
 
 const features = [
   { label: "Fast billing", icon: Receipt },
