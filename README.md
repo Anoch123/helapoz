@@ -68,3 +68,40 @@ export function ShopLogoutButton() {
 <!-- The next step is to verify the My Profile files and run npx tsc --noEmit, then fix any errors before proceeding.
 
 The current milestone is My Profile implementation. I'll keep track of which files have been provided versus which have actually been created and tested, so we don't accidentally treat unfinished work as completed. -->
+
+
+
+const user = useCurrentUser();
+
+// User
+user.displayName;
+user.email;
+user.phone;
+
+// Membership
+user.role;
+user.membershipStatus;
+
+// Shop
+user.shop.name;
+user.shop.shopCode;
+user.shop.contactEmail;
+user.shop.contactPhone;
+user.shop.city;
+user.shop.businessType;
+
+// Permissions
+user.permissions;
+user.permissionDetails;
+
+// Subscription
+user.subscription.status;
+user.subscription.accessType;
+user.subscription.currentPeriodEnd;
+user.subscription.nextBillingDate;
+
+// Plan
+user.subscription.plan.name;
+user.subscription.plan.monthlyPrice;
+user.subscription.plan.additionalUserPrice;
+user.subscription.plan.includedShopUsers;

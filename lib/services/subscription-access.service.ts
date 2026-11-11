@@ -1,5 +1,7 @@
 import "server-only";
 
+import { connection } from "next/server";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 
 interface SubscriptionAccessResult {
@@ -43,6 +45,8 @@ export async function checkShopSubscriptionAccess(
   if (typeof shopId !== "string" || !shopId.trim()) {
     return denied("INVALID_SUBSCRIPTION");
   }
+
+  await connection();
 
   try {
     const admin = createAdminClient();

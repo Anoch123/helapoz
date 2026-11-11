@@ -1,13 +1,7 @@
 import { BarChart3, Lock, Receipt, Store, Users } from "lucide-react";
 
 import { LoginForm } from "@/components/form/auth/login-form";
-import { BASICSYSTEMDATA } from "@/lib/constants/helper-constants";
-
-const features = [
-  { label: "Fast billing", icon: Receipt },
-  { label: "Staff management", icon: Users },
-  { label: "Business insights", icon: BarChart3 },
-];
+import { BASICSYSTEMDATA, features } from "@/lib/constants/helper-constants";
 
 export default function LoginPage() {
   return (
@@ -33,7 +27,7 @@ export default function LoginPage() {
           <div className="flex size-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-inset ring-white/25">
             <Store className="size-5" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">
+          <span className="text-lg font-semibold tracking-widest">
             {BASICSYSTEMDATA.appName}
           </span>
         </div>
@@ -51,7 +45,7 @@ export default function LoginPage() {
         </div>
 
         <ul className="relative flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-6 text-sm text-indigo-50">
-          {features.map((f) => {
+          {features .map((f) => {
             const Icon = f.icon;
             return (
               <li key={f.label} className="flex items-center gap-2.5">

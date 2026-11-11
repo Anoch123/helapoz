@@ -16,14 +16,14 @@ export class ShopPermissionError extends Error {
 }
 
 export async function requireShopPermission(permissionKey: string) {
-  // 1. Validate the requested permission key.
+  // 1. Validate the permission key.
   if (
     typeof permissionKey !== "string" ||
     !permissionKey.trim() ||
     permissionKey !== permissionKey.trim()
   ) {
     throw new ShopPermissionError(
-      "Invalid permission key.",
+      "Access could not be verified. Please contact support.",
       500,
       "INVALID_PERMISSION_KEY"
     );
@@ -32,14 +32,14 @@ export async function requireShopPermission(permissionKey: string) {
   // 2. Verify the authenticated shop context.
   const context = await requireShopContext();
 
-  // 3. Shop Admin has full access within their shop.
+  // 3. Shop Admin automatically has full access.
   if (context.membership.role === "SHOP_ADMIN") {
     return context;
   }
 
-  // 4. Use the database as the permission catalogue.
   const admin = createAdminClient();
 
+  // 4. Verify that the permission exists and is active.
   const { data: permission, error: permissionError } = await admin
     .from("permissions")
     .select("permission_key")
@@ -49,10 +49,13 @@ export async function requireShopPermission(permissionKey: string) {
     .maybeSingle();
 
   if (permissionError) {
-    console.error("Permission catalogue lookup failed.");
+    console.error("Permission catalogue lookup failed:", {
+      message: permissionError.message,
+      code: permissionError.code,
+    });
 
     throw new ShopPermissionError(
-      "Unable to verify your permissions.",
+      "We couldn't verify your access right now. Please try again later.",
       503,
       "PERMISSION_CHECK_FAILED"
     );
@@ -60,13 +63,13 @@ export async function requireShopPermission(permissionKey: string) {
 
   if (!permission) {
     throw new ShopPermissionError(
-      "This permission is unavailable.",
+      "This feature is currently unavailable. Please contact your Shop Admin.",
       403,
       "PERMISSION_UNAVAILABLE"
     );
   }
 
-  // 5. Check the Shop User's grant in this specific shop.
+  // 5. Verify that this Shop User has been granted the permission.
   const { data: grantedPermission, error: grantError } = await admin
     .from("shop_user_permissions")
     .select("permission_key")
@@ -76,10 +79,13 @@ export async function requireShopPermission(permissionKey: string) {
     .maybeSingle();
 
   if (grantError) {
-    console.error("Shop user permission lookup failed.");
+    console.error("Shop user permission lookup failed:", {
+      message: grantError.message,
+      code: grantError.code,
+    });
 
     throw new ShopPermissionError(
-      "Unable to verify your permissions.",
+      "We couldn't verify your access right now. Please try again later.",
       503,
       "PERMISSION_CHECK_FAILED"
     );
@@ -87,7 +93,7 @@ export async function requireShopPermission(permissionKey: string) {
 
   if (!grantedPermission) {
     throw new ShopPermissionError(
-      "You do not have permission to perform this operation.",
+      "You don't have access to this feature. Please contact your Shop Admin to request permission.",
       403,
       "PERMISSION_DENIED"
     );

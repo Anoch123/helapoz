@@ -38,7 +38,7 @@ export function SupportDialog() {
 
         <span className="relative min-w-0 flex-1">
           <span className="block text-sm font-semibold text-foreground">
-            Contact {BASICSYSTEMDATA.appName} support
+            Contact {BASICSYSTEMDATA.appNameCapitalize} support
           </span>
           <span className="mt-0.5 block text-xs text-muted-foreground">
             Locked out or can&apos;t find your shop code?
@@ -67,7 +67,7 @@ export function SupportDialog() {
           </DialogTitle>
 
           <DialogDescription className="relative">
-            Reach the {BASICSYSTEMDATA.appName} team through any channel below.
+            Reach the {BASICSYSTEMDATA.appNameCapitalize} team through any channel below.
           </DialogDescription>
 
           <p className="relative mt-1 inline-flex w-fit items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">

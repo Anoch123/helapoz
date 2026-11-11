@@ -15,6 +15,11 @@ import {
 import { validateCsrfRequest } from "@/lib/services/csrf.service";
 import { createShopUserSchema } from "@/lib/validations/shop-user.validation";
 
+import {
+  requireShopPermission,
+  ShopPermissionError,
+} from "@/lib/services/require-shop-permission.service";
+
 // export const dynamic = "force-dynamic";
 
 const NO_STORE_HEADERS = {
@@ -50,6 +55,14 @@ function handleRouteError(error: unknown) {
   }
 
   if (error instanceof ShopUserServiceError) {
+    return errorResponse(
+      error.message,
+      error.code,
+      error.status,
+    );
+  }
+
+  if (error instanceof ShopPermissionError) {
     return errorResponse(
       error.message,
       error.code,
@@ -157,6 +170,7 @@ export async function GET(request: NextRequest) {
     return handleRouteError(error);
   }
 }
+
 
 /**
  * POST /api/shop/users

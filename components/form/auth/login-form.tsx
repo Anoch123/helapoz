@@ -6,42 +6,24 @@ import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 import { shopLoginSchema } from "@/lib/validations/auth.validation";
 import { useShopLogin } from "@/hooks/useShopLogin";
 import { SupportDialog } from "@/components/widgets/helapoz-support/support-dialog";
-
-/* Shared shadcn Input styling: taller, rounded, indigo focus ring. */
-const inputClass =
-  "h-12 rounded-xl px-4 focus-visible:border-indigo-500 focus-visible:ring-4 focus-visible:ring-indigo-500/15";
-
-function Field({
-  label,
-  htmlFor,
-  error,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
-
-      {children}
-
-      {error && (
-        <p id={`${htmlFor}-error`} className="text-xs text-destructive">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
+import { inputClass, inputGroupClass } from "@/lib/constants/helper-constants";
 
 export function LoginForm() {
   const router = useRouter();
@@ -105,102 +87,104 @@ export function LoginForm() {
         Sign in with your shop account to continue.
       </p>
 
-      <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
-        <Field label="Shop code" htmlFor="shopCode" error={errors.shopCode}>
-          <Input
-            id="shopCode"
-            placeholder="Enter your shop code"
-            value={form.shopCode}
-            onChange={(e) => handleChange("shopCode", e.target.value)}
-            disabled={isPending}
-            aria-invalid={!!errors.shopCode}
-            aria-describedby={errors.shopCode ? "shopCode-error" : undefined}
-            className={`${inputClass} font-mono`}
-          />
-        </Field>
-
-        <Field label="Email address" htmlFor="email" error={errors.email}>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="username"
-            value={form.email}
-            onChange={(e) => handleChange("email", e.target.value)}
-            disabled={isPending}
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "email-error" : undefined}
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Password" htmlFor="password" error={errors.password}>
-          <div className="relative">
+      <form onSubmit={handleSubmit} noValidate className="mt-6">
+        <FieldGroup className="gap-4">
+          <Field data-invalid={!!errors.shopCode}>
+            <FieldLabel htmlFor="shopCode">Shop code</FieldLabel>
             <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
-              autoComplete="current-password"
-              value={form.password}
-              onChange={(e) => handleChange("password", e.target.value)}
+              id="shopCode"
+              placeholder="Enter your shop code"
+              value={form.shopCode}
+              onChange={(e) => handleChange("shopCode", e.target.value)}
               disabled={isPending}
-              aria-invalid={!!errors.password}
-              aria-describedby={errors.password ? "password-error" : undefined}
-              className={`${inputClass} pr-12`}
+              aria-invalid={!!errors.shopCode}
+              className={`${inputClass} font-mono`}
             />
+            <FieldError>{errors.shopCode}</FieldError>
+          </Field>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowPassword((previous) => !previous)}
+          <Field data-invalid={!!errors.email}>
+            <FieldLabel htmlFor="email">Email address</FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="username"
+              value={form.email}
+              onChange={(e) => handleChange("email", e.target.value)}
               disabled={isPending}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute right-1.5 top-1/2 size-9 -translate-y-1/2 rounded-lg text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? (
-                <EyeOff className="size-4" />
-              ) : (
-                <Eye className="size-4" />
-              )}
-            </Button>
-          </div>
-        </Field>
+              aria-invalid={!!errors.email}
+              className={inputClass}
+            />
+            <FieldError>{errors.email}</FieldError>
+          </Field>
 
-        {formError && (
-          <Alert variant="destructive" className="rounded-xl">
-            <AlertCircle className="size-4" />
-            <AlertDescription>{formError}</AlertDescription>
-          </Alert>
-        )}
+          <Field data-invalid={!!errors.password}>
+            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <InputGroup className={inputGroupClass}>
+              <InputGroupInput
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                value={form.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+                disabled={isPending}
+                aria-invalid={!!errors.password}
+                className="px-4"
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setShowPassword((previous) => !previous)}
+                  disabled={isPending}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="rounded-lg"
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+            <FieldError>{errors.password}</FieldError>
+          </Field>
 
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="h-12 w-full rounded-xl bg-indigo-600 text-sm font-semibold hover:bg-indigo-700"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
-              Signing in
-            </>
-          ) : (
-            "Sign in"
+          {formError && (
+            <Alert variant="destructive" className="rounded-xl">
+              <AlertCircle className="size-4" />
+              <AlertDescription>{formError}</AlertDescription>
+            </Alert>
           )}
-        </Button>
+
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="h-12 w-full rounded-xl bg-indigo-600 text-sm font-semibold hover:bg-indigo-700"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Signing in
+              </>
+            ) : (
+              "Sign in"
+            )}
+          </Button>
+        </FieldGroup>
       </form>
 
       <div className="mt-8">
-  <div className="flex items-center gap-3">
-    <span className="h-px flex-1 bg-border" />
-    <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-      Need help?
-    </span>
-    <span className="h-px flex-1 bg-border" />
-  </div>
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+            Need help?
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
 
-  <SupportDialog />
-</div>
+        <SupportDialog />
+      </div>
     </div>
   );
 }

@@ -1,13 +1,14 @@
-
-import PosLayout from "@/components/widgets/layouts/pos-layout";
 import type { ReactNode } from "react";
-
-type DashboardLayoutProps = {
-  children: ReactNode;
-};
+import CurrentUserLoader from "@/components/providers/current-user-loader";
 
 export default function DashboardLayout({
   children,
-}: DashboardLayoutProps) {
-  return <PosLayout>{children}</PosLayout>;
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <CurrentUserLoader>
+      {children}
+    </CurrentUserLoader>
+  );
 }

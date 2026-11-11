@@ -10,24 +10,64 @@ import {
   X,
   LogOut,
   Loader2,
-  ChevronRight,
+  Plus,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { useShopLogout } from "@/hooks/useShopLogout";
-import { BASICSYSTEMDATA, navigationItems } from "@/lib/constants/helper-constants";
+import { useCurrentUser } from "@/hooks/use-current-user";
+
+import {
+  BASICSYSTEMDATA,
+  navigationItems,
+} from "@/lib/constants/helper-constants";
+
+const NEW_SALE_HREF = "/pos";
+
+// Map existing navigation routes to database permission keys.
+const navigationPermissions: Record<string, string> = {
+  "/dashboard": "dashboard.view",
+  "/staff": "staff.view",
+  "/sales": "sales.view"
+};
 
 export default function PosSidebar() {
   const pathname = usePathname();
+  const user = useCurrentUser();
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
 
   const { logout, isPending } = useShopLogout();
 
+  // Shop Admin has full access.
+  // Shop Users must have the required permission.
+  function hasPermission(permissionKey: string) {
+    if (user.isShopAdmin) return true;
+
+    return user.permissions.includes(permissionKey);
+  }
+
+  // Only show navigation items the current user can access.
+  const visibleNavigationItems = navigationItems.filter((item) => {
+    const requiredPermission = navigationPermissions[item.href];
+
+    // Unknown routes should not automatically become accessible.
+    if (!requiredPermission) return false;
+
+    return hasPermission(requiredPermission);
+  });
+
+  // New Sale requires sales.create.
+  const canCreateSale = hasPermission("sales.create");
+
+  // The brand link should never send a user to a page
+  // they are not authorized to access.
+  const homeHref =
+    visibleNavigationItems[0]?.href ??
+    (canCreateSale ? NEW_SALE_HREF : null);
+
   function isActive(href: string) {
-    if (href === "/dashboard") {
-      return pathname === href;
-    }
+    if (href === "/dashboard") return pathname === href;
 
     return pathname === href || pathname.startsWith(`${href}/`);
   }
@@ -48,165 +88,205 @@ export default function PosSidebar() {
 
   return (
     <>
-      {/* Mobile top navigation */}
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background px-4 lg:hidden">
-        <Link
-          href="/dashboard"
-          onClick={closeMobileSidebar}
-          className="flex items-center gap-2 font-semibold"
-        >
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Store className="size-5" />
-          </div>
-          <span>{BASICSYSTEMDATA.appName}</span>
-        </Link>
+      {/* Mobile top bar */}
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur lg:hidden">
+        {homeHref ? (
+          <Link
+            href={homeHref}
+            onClick={closeMobileSidebar}
+            className="flex items-center gap-2.5 font-semibold"
+          >
+            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-md shadow-indigo-600/30">
+              <Store className="size-[18px]" />
+            </span>
 
-        <Button
-          variant="ghost"
-          size="icon"
+            <span className="tracking-wide">
+              {BASICSYSTEMDATA.appName}
+            </span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-2.5 font-semibold">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
+              <Store className="size-[18px]" />
+            </span>
+
+            <span>{BASICSYSTEMDATA.appName}</span>
+          </div>
+        )}
+
+        <button
+          type="button"
           onClick={() => setIsMobileOpen((current) => !current)}
           aria-label={isMobileOpen ? "Close menu" : "Open menu"}
+          className="flex size-10 items-center justify-center rounded-xl border bg-background text-foreground transition hover:bg-muted"
         >
           {isMobileOpen ? (
             <X className="size-5" />
           ) : (
             <Menu className="size-5" />
           )}
-        </Button>
+        </button>
       </header>
 
-      {/* Mobile backdrop */}
+      {/* Backdrop */}
       {isMobileOpen && (
         <button
           type="button"
           aria-label="Close navigation menu"
           onClick={closeMobileSidebar}
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm lg:hidden"
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-background transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-white text-slate-600 transition-transform duration-200 lg:translate-x-0 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        {/* Background glow */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-indigo-50 to-transparent" />
+
         {/* Brand */}
-        <div className="flex h-16 items-center justify-between border-b px-5">
-          <Link
-            href="/dashboard"
-            onClick={closeMobileSidebar}
-            className="flex items-center gap-3"
-          >
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Store className="size-5" />
-            </div>
+        <div className="relative flex h-16 items-center justify-between px-5">
+          {homeHref ? (
+            <Link
+              href={homeHref}
+              onClick={closeMobileSidebar}
+              className="flex items-center gap-3"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-600/30">
+                <Store className="size-5" />
+              </span>
 
-            <div>
-              <p className="text-sm font-bold tracking-tight">
-                {BASICSYSTEMDATA.appName}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Shop workspace
-              </p>
-            </div>
-          </Link>
+              <div className="leading-tight">
+                <p className="text-sm font-bold tracking-widest text-slate-900">
+                  {BASICSYSTEMDATA.appName}
+                </p>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
+                <p className="text-[11px] text-slate-500">
+                  Point of Sale
+                </p>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
+                <Store className="size-5" />
+              </span>
+
+              <div className="leading-tight">
+                <p className="text-sm font-bold tracking-widest text-slate-900">
+                  {BASICSYSTEMDATA.appName}
+                </p>
+
+                <p className="text-[11px] text-slate-500">
+                  Point of Sale
+                </p>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
             onClick={closeMobileSidebar}
             aria-label="Close sidebar"
+            className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 lg:hidden"
           >
             <X className="size-4" />
-          </Button>
+          </button>
         </div>
 
-        {/* Workspace information */}
-        <div className="px-4 py-5">
-          <div className="rounded-xl border bg-muted/40 p-3">
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-background">
-                <Store className="size-4 text-muted-foreground" />
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-xs font-semibold">
-                  Shop Workspace
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  POS Management
-                </p>
-              </div>
-            </div>
+        {/* New Sale CTA */}
+        {canCreateSale && (
+          <div className="relative px-4 pb-2 pt-4">
+            <Link
+              href={NEW_SALE_HREF}
+              onClick={closeMobileSidebar}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500 active:scale-[0.98]"
+            >
+              <Plus className="size-4" />
+              New sale
+            </Link>
           </div>
-        </div>
+        )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-3">
-          <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Workspace
+        <nav className="relative flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Menu
           </p>
 
-          {navigationItems.map((item) => {
-            const active = isActive(item.href);
-            const Icon = item.icon;
+          {visibleNavigationItems.length > 0 ? (
+            visibleNavigationItems.map((item) => {
+              const active = isActive(item.href);
+              const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeMobileSidebar}
-                aria-current={active ? "page" : undefined}
-                className={`group flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <Icon className="size-[18px]" />
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMobileSidebar}
+                  aria-current={active ? "page" : undefined}
+                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-indigo-50 text-indigo-700"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  {active && (
+                    <span className="absolute -left-3 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-indigo-600" />
+                  )}
+
+                  <span
+                    className={`flex size-8 items-center justify-center rounded-lg transition-colors ${
+                      active
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                        : "bg-slate-100 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600"
+                    }`}
+                  >
+                    <Icon className="size-[17px]" />
+                  </span>
+
                   {item.title}
-                </span>
+                </Link>
+              );
+            })
+          ) : (
+            <div className="px-3 py-6 text-center">
+              <p className="text-sm font-medium text-slate-600">
+                No available modules
+              </p>
 
-                {active && (
-                  <ChevronRight className="size-4" />
-                )}
-              </Link>
-            );
-          })}
+              <p className="mt-1 text-xs leading-5 text-slate-400">
+                Contact your Shop Admin to request access.
+              </p>
+            </div>
+          )}
         </nav>
 
         {/* Logout */}
-        <div className="border-t p-4">
+        <div className="relative border-t p-4">
           {logoutError && (
-            <p
-              role="alert"
-              className="mb-3 text-xs text-destructive"
-            >
+            <p role="alert" className="mb-3 text-xs text-red-600">
               {logoutError}
             </p>
           )}
 
-          <Button
-            variant="outline"
-            className="w-full justify-start"
+          <button
+            type="button"
             onClick={handleLogout}
             disabled={isPending}
+            className="flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
           >
             {isPending ? (
-              <Loader2 className="animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <LogOut />
+              <LogOut className="size-4" />
             )}
 
             {isPending ? "Logging out..." : "Logout"}
-          </Button>
-
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            {BASICSYSTEMDATA.appName}
-          </p>
+          </button>
         </div>
       </aside>
     </>

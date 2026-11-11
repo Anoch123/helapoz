@@ -10,7 +10,7 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: BASICSYSTEMDATA.appName,
+  title: BASICSYSTEMDATA.appTitle,
   description: BASICSYSTEMDATA.appDescription,
 };
 
