@@ -348,3 +348,28 @@ export const toneStyles: Record<Tone, { icon: string; iconWrap: string; badge: s
     badge: "bg-slate-500/10 text-slate-700",
   },
 };
+
+export const VARIANTS = {
+  login: {
+    badge: "Sign in required",
+    panel: "from-indigo-600 via-indigo-700 to-indigo-900",
+    iconWrap: "bg-indigo-500/10 text-indigo-600",
+    badgeStyle: "bg-indigo-500/10 text-indigo-600",
+    dot: "bg-indigo-600",
+    tip: "bg-indigo-500/10 text-indigo-600",
+    panelTitle: "Pick up where you left off",
+    panelText:
+      "Your session needs to be verified before we can open your shop.",
+  },
+  restricted: {
+    badge: "Access restricted",
+    panel: "from-rose-600 via-red-700 to-red-900",
+    iconWrap: "bg-destructive/10 text-destructive",
+    badgeStyle: "bg-destructive/10 text-destructive",
+    dot: "bg-destructive",
+    tip: "bg-destructive/10 text-destructive",
+    panelTitle: "Your shop is temporarily unavailable",
+    panelText:
+      "Access to this shop is paused. Your data is safe and nothing has been deleted.",
+  },
+} as const;

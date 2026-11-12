@@ -10,6 +10,7 @@ import {
   LogOut,
   Phone,
   ShieldCheck,
+  Store,
 } from "lucide-react";
 
 import { ShopAccessScreenProps } from "@/lib/types/helper.type";
@@ -17,34 +18,10 @@ import {
   accessMessages,
   BASICSYSTEMDATA,
   fallbackMessage,
+  VARIANTS,
 } from "@/lib/constants/helper-constants";
 import { useShopLogout } from "@/hooks/useShopLogout";
 import { useState } from "react";
-
-const VARIANTS = {
-  login: {
-    badge: "Sign in required",
-    panel: "from-indigo-600 via-indigo-700 to-indigo-900",
-    iconWrap: "bg-indigo-500/10 text-indigo-600",
-    badgeStyle: "bg-indigo-500/10 text-indigo-600",
-    dot: "bg-indigo-600",
-    tip: "bg-indigo-500/10 text-indigo-600",
-    panelTitle: "Pick up where you left off",
-    panelText:
-      "Your session needs to be verified before we can open your shop.",
-  },
-  restricted: {
-    badge: "Access restricted",
-    panel: "from-rose-600 via-red-700 to-red-900",
-    iconWrap: "bg-destructive/10 text-destructive",
-    badgeStyle: "bg-destructive/10 text-destructive",
-    dot: "bg-destructive",
-    tip: "bg-destructive/10 text-destructive",
-    panelTitle: "Your shop is temporarily unavailable",
-    panelText:
-      "Access to this shop is paused. Your data is safe and nothing has been deleted.",
-  },
-} as const;
 
 export default function LoginRequiredScreen({ code }: ShopAccessScreenProps) {
   const [logoutError, setLogoutError] = useState<string | null>(null);
@@ -82,9 +59,9 @@ export default function LoginRequiredScreen({ code }: ShopAccessScreenProps) {
 
         <div className="relative flex items-center gap-2.5">
           <span className="flex size-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-            <Building2 className="size-5" />
+            <Store className="size-5" />
           </span>
-          <span className="text-xl font-semibold tracking-tight">
+          <span className="text-xl font-semibold tracking-widest">
             {BASICSYSTEMDATA.appNameCapitalize}
           </span>
         </div>
