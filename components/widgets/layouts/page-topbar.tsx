@@ -474,7 +474,7 @@ export default function PosTopbar() {
                   <SubRow
                     icon={Users}
                     label="Extra user"
-                    value={plan?.additionalUserPrice != null ? `${formatMoney(plan.additionalUserPrice)} / mo` : "—"}
+                    value={plan?.additionalUserPrice != null ? `${formatMoney(plan.additionalUserPrice)} / One-time` : "—"}
                   />
                   <SubRow
                     icon={Timer}

@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeftRight, BarChart3, Building2, CalendarX, Clock, CreditCard, KeyRound, LayoutDashboard, LockKeyhole, Mail, MessageCircle, Phone, Printer, Receipt, Settings, ShieldAlert, ShieldQuestion, Store, UserCircle, UserRound, UserRoundX, Users, Wallet } from "lucide-react";
+import { AlertCircle, ArrowLeftRight, BarChart3, Building2, CalendarX, Clock, CreditCard, KeyRound, LayoutDashboard, LockKeyhole, LogIn, Mail, MessageCircle, Phone, Printer, Receipt, Settings, ShieldAlert, ShieldQuestion, Store, UserCircle, UserRound, UserRoundX, Users, UserX, Wallet } from "lucide-react";
 import { MenuAction } from "../types/menu.action.type";
 import { AccessMessage, MessageConfig, Tone } from "../types/helper.type";
 
@@ -271,6 +271,44 @@ export const statusTone = (status?: string | null): Tone => {
     action:
       "Please try again later. Contact Helapoz support if the issue continues.",
     icon: AlertCircle,
+  },
+
+
+  // login required codes
+  UNAUTHENTICATED: {
+    title: "Sign In to Continue",
+    description:
+      "You're not signed in, or your session has expired.",
+    action:
+      "Please sign in again to open your shop. Contact Helapoz support if you keep being signed out.",
+    icon: LogIn,
+  },
+ 
+  SHOP_SESSION_MISSING: {
+    title: "No Shop Selected",
+    description:
+      "We couldn't find an active shop session for your account.",
+    action:
+      "Please sign in again and choose your shop. Contact Helapoz support if the shop doesn't appear.",
+    icon: Store,
+  },
+ 
+  INVALID_SHOP_SESSION: {
+    title: "Session No Longer Valid",
+    description:
+      "Your shop session is invalid or has expired for security reasons.",
+    action:
+      "Please sign in again to start a new session. Contact Helapoz support if this keeps happening.",
+    icon: ShieldAlert,
+  },
+ 
+  SESSION_USER_MISMATCH: {
+    title: "Account Mismatch",
+    description:
+      "This shop session belongs to a different account than the one you're signed in with.",
+    action:
+      "Please sign out, then sign in with the account that owns this shop. Contact Helapoz support if you need help.",
+    icon: UserX,
   },
 };
 

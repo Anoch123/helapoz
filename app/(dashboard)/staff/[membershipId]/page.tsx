@@ -2,6 +2,8 @@
 import { Suspense } from "react";
 import StaffDetails from "@/components/widgets/staff/staff-details";
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{
     membershipId: string;

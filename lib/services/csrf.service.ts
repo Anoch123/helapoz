@@ -65,8 +65,6 @@ export function validateCsrfRequest(
     return null;
   }
 
-  console.log("crsf");
-
   const trustedOrigin = getTrustedOrigin();
 
   if (!trustedOrigin) {

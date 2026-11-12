@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import CurrentUserLoader from "@/components/providers/current-user-loader";
 
-export default function DashboardLayout({
+export default function SignedInLayout({
   children,
 }: {
   children: ReactNode;

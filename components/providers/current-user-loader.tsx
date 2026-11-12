@@ -9,6 +9,8 @@ import PosLayout from "@/components/widgets/layouts/pos-layout";
 import { getCurrentUser } from "@/lib/services/current-user.service";
 import { ShopContextError } from "@/lib/services/require-shop-context.service";
 import ShopAccessScreen from "../widgets/subscription/shop-access-screen";
+import PageLoader from "../widgets/layouts/page-loading";
+import LoginRequiredScreen from "../widgets/auth/login-required-screen";
 
 const LOGIN_REQUIRED_CODES = [
   "UNAUTHENTICATED",
@@ -51,7 +53,7 @@ async function CurrentUserContent({
     if (error instanceof ShopContextError) {
       // Authentication or session problems.
       if (LOGIN_REQUIRED_CODES.includes(error.code)) {
-        redirect("/login?reason=session");
+        return <LoginRequiredScreen code={error.code} />;
       }
 
       // Shop, membership, and subscription restrictions.
@@ -74,9 +76,7 @@ export default async function CurrentUserLoader({
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-muted/30">
-          <p className="text-sm text-muted-foreground">
-            Loading your workspace...
-          </p>
+          <PageLoader />
         </div>
       }
     >

@@ -71,6 +71,7 @@ export async function requireShopContext(): Promise<ShopContext> {
     )?.value;
 
     if (!sessionToken) {
+      console.log("sdfsduhfyiusdhfsdfhsdufisdufdsfusdhufd");
       throw new ShopContextError(
         "Shop session not found.",
         401,
