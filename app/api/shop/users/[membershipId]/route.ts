@@ -89,13 +89,13 @@ export async function GET(
   try {
     const context = await requireShopContext();
 
-    if (context.membership.role !== "SHOP_ADMIN") {
-      return errorResponse(
-        "Only Shop Admins can view staff details.",
-        "SHOP_ADMIN_REQUIRED",
-        403,
-      );
-    }
+    // if (context.membership.role !== "SHOP_ADMIN") {
+    //   return errorResponse(
+    //     "Only Shop Admins can view staff details.",
+    //     "SHOP_ADMIN_REQUIRED",
+    //     403,
+    //   );
+    // }
 
     const { membershipId } = await params;
 

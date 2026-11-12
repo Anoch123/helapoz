@@ -10,13 +10,18 @@ import {
   type ReactNode,
 } from "react";
 
+import {
+  ALL_ACCESS_ROLES,
+  ROLE_ORDER,
+  type Role,
+} from "@/lib/constants/access-roles";
+
 /* -------------------------------------------------------------------------- */
 /*  Roles                                                                      */
 /* -------------------------------------------------------------------------- */
 
-// Lowest -> highest. Edit to match your project.
-export const ROLE_ORDER = ["user", "staff", "manager", "admin", "owner"] as const;
-export type Role = (typeof ROLE_ORDER)[number];
+// Role constants live in a plain module so server components can use them too.
+export type { Role };
 
 const rank = (role: Role | null) => (role ? ROLE_ORDER.indexOf(role) : -1);
 
@@ -74,6 +79,9 @@ export function useAccess() {
     const hasMinRole = (min: Role) => rank(role) >= rank(min) && role !== null;
 
     const hasPermission = (keys: string | string[], match: "any" | "all" = "any") => {
+      // SHOP_ADMIN (see ALL_ACCESS_ROLES) passes every permission check.
+      if (role !== null && ALL_ACCESS_ROLES.includes(role)) return true;
+
       const list = toArray(keys);
       if (list.length === 0) return true;
       return match === "all"

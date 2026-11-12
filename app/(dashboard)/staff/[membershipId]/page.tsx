@@ -18,7 +18,7 @@ async function StaffDetailsContent({ params }: PageProps) {
 
 export default function StaffDetailsPage({ params }: PageProps) {
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
+    <main className="mx-auto w-full max-w-full space-y-2 md:p-2">
       <Suspense
         fallback={
           <div className="animate-pulse space-y-4">

@@ -1,5 +1,10 @@
 import { Suspense } from "react";
 import StaffPermissions from "@/components/widgets/staff/staff-permissions";
+import {
+  LoadingState,
+  PageContainer,
+  Panel,
+} from "@/components/widgets/layouts/page-kit";
 
 export const instant = false;
 
@@ -9,34 +14,23 @@ type PageProps = {
   }>;
 };
 
-function PageSkeleton() {
-  return (
-    <main className="mx-auto w-full max-w-6xl p-4 md:p-6">
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <div className="h-80 animate-pulse rounded-2xl bg-muted" />
-        <div className="space-y-4">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-40 animate-pulse rounded-2xl bg-muted" />
-          ))}
-        </div>
-      </div>
-    </main>
-  );
-}
-
 async function StaffPermissionsContent({ params }: PageProps) {
   const { membershipId } = await params;
 
-  return (
-    <main className="mx-auto w-full max-w-6xl p-4 md:p-6">
-      <StaffPermissions membershipId={membershipId} />
-    </main>
-  );
+  return <StaffPermissions membershipId={membershipId} />;
 }
 
 export default function StaffPermissionsPage({ params }: PageProps) {
   return (
-    <Suspense fallback={<PageSkeleton />}>
+    <Suspense
+      fallback={
+        <PageContainer>
+          <Panel>
+            <LoadingState label="Loading permissions..." />
+          </Panel>
+        </PageContainer>
+      }
+    >
       <StaffPermissionsContent params={params} />
     </Suspense>
   );

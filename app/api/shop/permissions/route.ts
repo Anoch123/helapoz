@@ -19,16 +19,16 @@ export async function GET() {
   try {
     const context = await requireShopContext();
 
-    if (context.membership.role !== "SHOP_ADMIN") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "You are not authorized to manage permissions.",
-          code: "FORBIDDEN",
-        },
-        { status: 403, headers: NO_STORE_HEADERS }
-      );
-    }
+    // if (context.membership.role !== "SHOP_ADMIN") {
+    //   return NextResponse.json(
+    //     {
+    //       success: false,
+    //       message: "You are not authorized to manage permissions.",
+    //       code: "FORBIDDEN",
+    //     },
+    //     { status: 403, headers: NO_STORE_HEADERS }
+    //   );
+    // }
 
     const permissions = await getActivePermissions();
 

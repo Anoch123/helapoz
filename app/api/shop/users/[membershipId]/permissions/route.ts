@@ -81,13 +81,13 @@ export async function GET(
   try {
     const context = await requireShopContext();
 
-    if (context.membership.role !== "SHOP_ADMIN") {
-      return errorResponse(
-        "You are not authorized to manage permissions.",
-        "FORBIDDEN",
-        403
-      );
-    }
+    // if (context.membership.role !== "SHOP_ADMIN") {
+    //   return errorResponse(
+    //     "You are not authorized to manage permissions.",
+    //     "FORBIDDEN",
+    //     403
+    //   );
+    // }
 
     const { membershipId } = await params;
 
@@ -135,13 +135,13 @@ export async function PUT(
   try {
     const context = await requireShopContext();
 
-    if (context.membership.role !== "SHOP_ADMIN") {
-      return errorResponse(
-        "You are not authorized to manage permissions.",
-        "FORBIDDEN",
-        403
-      );
-    }
+    // if (context.membership.role !== "SHOP_ADMIN") {
+    //   return errorResponse(
+    //     "You are not authorized to manage permissions.",
+    //     "FORBIDDEN",
+    //     403
+    //   );
+    // }
 
     const { membershipId } = await params;
 

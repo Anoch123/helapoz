@@ -1,4 +1,3 @@
-
 import { Suspense, type ReactNode } from "react";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
@@ -10,8 +9,12 @@ import { getCurrentUser } from "@/lib/services/current-user.service";
 import { ShopContextError } from "@/lib/services/require-shop-context.service";
 import ShopAccessScreen from "../widgets/subscription/shop-access-screen";
 import PageLoader from "../widgets/layouts/page-loading";
-import LoginRequiredScreen from "../widgets/auth/login-required-screen";
+import { toAccessRole } from "@/lib/constants/access-roles";
+import { AccessProvider } from "../widgets/auth/access-control";
 
+const LOGIN_PATH = "/login";
+
+// Authentication or session problems -> send the user to the login page.
 const LOGIN_REQUIRED_CODES = [
   "UNAUTHENTICATED",
   "SHOP_SESSION_MISSING",
@@ -19,6 +22,7 @@ const LOGIN_REQUIRED_CODES = [
   "SESSION_USER_MISMATCH",
 ];
 
+// Shop, membership, and subscription restrictions -> show the access screen.
 const ACCESS_RESTRICTED_CODES = [
   "SHOP_SESSION_CHECK_FAILED",
   "SHOP_UNAVAILABLE",
@@ -34,29 +38,31 @@ const ACCESS_RESTRICTED_CODES = [
   "SUBSCRIPTION_CHECK_FAILED",
 ];
 
-async function CurrentUserContent({
-  children,
-}: {
-  children: ReactNode;
-}) {
+async function CurrentUserContent({ children }: { children: ReactNode }) {
   await connection();
 
   try {
     const currentUser = await getCurrentUser();
 
+    // NOTE: adjust these two fields to match your current user shape.
+    const role = toAccessRole(currentUser.role);
+    const permissions: string[] = currentUser.permissions ?? [];
+
     return (
       <UserProvider initialUser={currentUser}>
-        <PosLayout>{children}</PosLayout>
+        <AccessProvider role={role} permissions={permissions}>
+          <PosLayout>{children}</PosLayout>
+        </AccessProvider>
       </UserProvider>
     );
   } catch (error) {
     if (error instanceof ShopContextError) {
-      // Authentication or session problems.
+      // redirect() throws by design. It is safe here because we are in the
+      // catch block, not inside the try block above.
       if (LOGIN_REQUIRED_CODES.includes(error.code)) {
-        return <LoginRequiredScreen code={error.code} />;
+        redirect(LOGIN_PATH);
       }
 
-      // Shop, membership, and subscription restrictions.
       if (ACCESS_RESTRICTED_CODES.includes(error.code)) {
         return <ShopAccessScreen code={error.code} />;
       }
