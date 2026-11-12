@@ -11,8 +11,7 @@ import ShopAccessScreen from "../widgets/subscription/shop-access-screen";
 import PageLoader from "../widgets/layouts/page-loading";
 import { toAccessRole } from "@/lib/constants/access-roles";
 import { AccessProvider } from "../widgets/auth/access-control";
-
-const LOGIN_PATH = "/login";
+import LoginRequiredScreen from "../widgets/auth/login-required-screen";
 
 // Authentication or session problems -> send the user to the login page.
 const LOGIN_REQUIRED_CODES = [
@@ -60,7 +59,7 @@ async function CurrentUserContent({ children }: { children: ReactNode }) {
       // redirect() throws by design. It is safe here because we are in the
       // catch block, not inside the try block above.
       if (LOGIN_REQUIRED_CODES.includes(error.code)) {
-        redirect(LOGIN_PATH);
+        return <LoginRequiredScreen code={error.code} />;
       }
 
       if (ACCESS_RESTRICTED_CODES.includes(error.code)) {
