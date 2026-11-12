@@ -28,3 +28,13 @@ export type AccessMessage = {
   action: string;
   icon: typeof AlertCircle;
 };
+
+export type StaffPermissions = {
+  "staff.view": boolean;
+  "staff.create": boolean;
+  "staff.update": boolean;
+  "staff.status.manage": boolean;
+  "staff.permissions.view": boolean;
+  "staff.permissions.manage": boolean;
+  "staff.remove": boolean;
+};

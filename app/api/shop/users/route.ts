@@ -114,13 +114,13 @@ export async function GET(request: NextRequest) {
   try {
     const context = await requireShopContext();
 
-    if (!isShopAdmin(context.membership.role)) {
-      return errorResponse(
-        "Only Shop Admins can view staff members.",
-        "SHOP_ADMIN_REQUIRED",
-        403,
-      );
-    }
+    // if (!isShopAdmin(context.membership.role)) {
+    //   return errorResponse(
+    //     "Only Shop Admins can view staff members.",
+    //     "SHOP_ADMIN_REQUIRED",
+    //     403,
+    //   );
+    // }
 
     const searchParams = request.nextUrl.searchParams;
 

@@ -1,4 +1,3 @@
-
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -15,38 +14,96 @@ export class ShopPermissionError extends Error {
   }
 }
 
-export async function requireShopPermission(permissionKey: string) {
-  // 1. Validate the permission key.
-  if (
-    typeof permissionKey !== "string" ||
-    !permissionKey.trim() ||
-    permissionKey !== permissionKey.trim()
-  ) {
+export type ShopPermissionMap = Record<string, boolean>;
+
+type PermissionDetails = {
+  available: boolean;
+  granted: boolean;
+};
+
+type PermissionCheckResult = {
+  context: Awaited<ReturnType<typeof requireShopContext>>;
+  permissions: Record<string, PermissionDetails>;
+};
+
+const INVALID_PERMISSION_MESSAGE =
+  "Access could not be verified. Please contact support.";
+
+const PERMISSION_DENIED_MESSAGE =
+  "You don't have access to this feature. Please contact your Shop Admin to request permission.";
+
+const PERMISSION_UNAVAILABLE_MESSAGE =
+  "This feature is currently unavailable. Please contact your Shop Admin.";
+
+const PERMISSION_CHECK_FAILED_MESSAGE =
+  "We couldn't verify your access right now. Please try again later.";
+
+function normalizePermissionKeys(
+  permissionKeys: readonly string[]
+): string[] {
+  if (!Array.isArray(permissionKeys) || permissionKeys.length === 0) {
     throw new ShopPermissionError(
-      "Access could not be verified. Please contact support.",
+      INVALID_PERMISSION_MESSAGE,
       500,
       "INVALID_PERMISSION_KEY"
     );
   }
 
-  // 2. Verify the authenticated shop context.
+  const keys = permissionKeys.map((key) => {
+    if (
+      typeof key !== "string" ||
+      !key.trim() ||
+      key !== key.trim()
+    ) {
+      throw new ShopPermissionError(
+        INVALID_PERMISSION_MESSAGE,
+        500,
+        "INVALID_PERMISSION_KEY"
+      );
+    }
+
+    return key;
+  });
+
+  return [...new Set(keys)];
+}
+
+/**
+ * Checks multiple permissions using a single shop context lookup
+ * and at most two database queries.
+ */
+async function checkShopPermissions(
+  permissionKeys: readonly string[]
+): Promise<PermissionCheckResult> {
+  const keys = normalizePermissionKeys(permissionKeys);
+
   const context = await requireShopContext();
 
-  // 3. Shop Admin automatically has full access.
+  // Shop Admin automatically has every permission.
   if (context.membership.role === "SHOP_ADMIN") {
-    return context;
+    return {
+      context,
+      permissions: Object.fromEntries(
+        keys.map((key) => [
+          key,
+          { available: true, granted: true },
+        ])
+      ),
+    };
   }
 
   const admin = createAdminClient();
 
-  // 4. Verify that the permission exists and is active.
-  const { data: permission, error: permissionError } = await admin
+  // Query 1: Get all requested active permissions.
+  const {
+    data: availablePermissions,
+    error: permissionError,
+  } = await admin
     .from("permissions")
     .select("permission_key")
-    .eq("permission_key", permissionKey)
+    .in("permission_key", keys)
     .eq("active", true)
-    .eq("is_active", true)
-    .maybeSingle();
+    .eq("is_active", true);
 
   if (permissionError) {
     console.error("Permission catalogue lookup failed:", {
@@ -55,28 +112,43 @@ export async function requireShopPermission(permissionKey: string) {
     });
 
     throw new ShopPermissionError(
-      "We couldn't verify your access right now. Please try again later.",
+      PERMISSION_CHECK_FAILED_MESSAGE,
       503,
       "PERMISSION_CHECK_FAILED"
     );
   }
 
-  if (!permission) {
-    throw new ShopPermissionError(
-      "This feature is currently unavailable. Please contact your Shop Admin.",
-      403,
-      "PERMISSION_UNAVAILABLE"
-    );
+  const availableKeys = new Set(
+    (availablePermissions ?? []).map(
+      (permission) => permission.permission_key
+    )
+  );
+
+  const activeKeys = keys.filter((key) => availableKeys.has(key));
+
+  // No need to query grants if none of the permissions are active.
+  if (activeKeys.length === 0) {
+    return {
+      context,
+      permissions: Object.fromEntries(
+        keys.map((key) => [
+          key,
+          { available: false, granted: false },
+        ])
+      ),
+    };
   }
 
-  // 5. Verify that this Shop User has been granted the permission.
-  const { data: grantedPermission, error: grantError } = await admin
+  // Query 2: Get all grants belonging to this Shop User.
+  const {
+    data: grantedPermissions,
+    error: grantError,
+  } = await admin
     .from("shop_user_permissions")
     .select("permission_key")
     .eq("shop_id", context.shopId)
     .eq("user_id", context.userId)
-    .eq("permission_key", permissionKey)
-    .maybeSingle();
+    .in("permission_key", activeKeys);
 
   if (grantError) {
     console.error("Shop user permission lookup failed:", {
@@ -85,19 +157,87 @@ export async function requireShopPermission(permissionKey: string) {
     });
 
     throw new ShopPermissionError(
-      "We couldn't verify your access right now. Please try again later.",
+      PERMISSION_CHECK_FAILED_MESSAGE,
       503,
       "PERMISSION_CHECK_FAILED"
     );
   }
 
-  if (!grantedPermission) {
+  const grantedKeys = new Set(
+    (grantedPermissions ?? []).map(
+      (permission) => permission.permission_key
+    )
+  );
+
+  return {
+    context,
+    permissions: Object.fromEntries(
+      keys.map((key) => [
+        key,
+        {
+          available: availableKeys.has(key),
+          granted: grantedKeys.has(key),
+        },
+      ])
+    ),
+  };
+}
+
+/**
+ * Returns boolean values for multiple permissions.
+ *
+ * Missing or inactive permissions return false.
+ */
+export async function getShopPermissions(
+  permissionKeys: readonly string[]
+): Promise<ShopPermissionMap> {
+  const result = await checkShopPermissions(permissionKeys);
+
+  return Object.fromEntries(
+    Object.entries(result.permissions).map(([key, value]) => [
+      key,
+      value.granted,
+    ])
+  );
+}
+
+/**
+ * Checks one permission without throwing for normal denial.
+ */
+export async function hasShopPermission(
+  permissionKey: string
+): Promise<boolean> {
+  const permissions = await getShopPermissions([permissionKey]);
+
+  return permissions[permissionKey] ?? false;
+}
+
+/**
+ * Enforces one permission.
+ *
+ * Use for protected pages and API routes.
+ */
+export async function requireShopPermission(
+  permissionKey: string
+) {
+  const result = await checkShopPermissions([permissionKey]);
+  const permission = result.permissions[permissionKey];
+
+  if (!permission?.available) {
     throw new ShopPermissionError(
-      "You don't have access to this feature. Please contact your Shop Admin to request permission.",
+      PERMISSION_UNAVAILABLE_MESSAGE,
+      403,
+      "PERMISSION_UNAVAILABLE"
+    );
+  }
+
+  if (!permission.granted) {
+    throw new ShopPermissionError(
+      PERMISSION_DENIED_MESSAGE,
       403,
       "PERMISSION_DENIED"
     );
   }
 
-  return context;
+  return result.context;
 }

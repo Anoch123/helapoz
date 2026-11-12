@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -19,23 +18,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useShopUsers } from "@/hooks/useShopUsers";
+import { StaffPermissions } from "@/lib/types/helper.type";
+import { formatDate } from "@/lib/utils/helper-functions";
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("en-LK", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(date));
-}
-
-export default function StaffDirectory() {
+export default function StaffDirectory({
+  permissions,
+}: {
+  permissions: StaffPermissions;
+}) {
   const router = useRouter();
 
   const {
     users,
     total,
     page,
-    pageSize,
     totalPages,
     isLoading,
     error,
@@ -76,10 +72,12 @@ export default function StaffDirectory() {
           </p>
         </div>
 
-        <Button onClick={() => router.push("/staff/new")}>
-          <Plus />
-          Add Staff
-        </Button>
+        {permissions["staff.create"] && (
+          <Button onClick={() => router.push("/staff/new")}>
+            <Plus />
+            Add Staff
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -90,9 +88,7 @@ export default function StaffDirectory() {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">
-                Total Shop Users
-              </p>
+              <p className="text-sm text-muted-foreground">Total Shop Users</p>
               <p className="text-2xl font-semibold tabular-nums">
                 {isLoading ? "—" : total}
               </p>
@@ -107,9 +103,7 @@ export default function StaffDirectory() {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">
-                Displaying
-              </p>
+              <p className="text-sm text-muted-foreground">Displaying</p>
               <p className="text-2xl font-semibold tabular-nums">
                 {isLoading ? "—" : filteredUsers.length}
               </p>
@@ -146,9 +140,7 @@ export default function StaffDirectory() {
               disabled={isLoading}
               aria-label="Refresh staff list"
             >
-              <RefreshCw
-                className={isLoading ? "animate-spin" : ""}
-              />
+              <RefreshCw className={isLoading ? "animate-spin" : ""} />
             </Button>
           </div>
         </div>
@@ -186,10 +178,7 @@ export default function StaffDirectory() {
               </div>
 
               {!search.trim() && (
-                <Button
-                  size="sm"
-                  onClick={() => router.push("/staff/new")}
-                >
+                <Button size="sm" onClick={() => router.push("/staff/new")}>
                   <Plus />
                   Add Staff
                 </Button>
@@ -209,9 +198,7 @@ export default function StaffDirectory() {
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate font-medium">
-                        {user.displayName}
-                      </p>
+                      <p className="truncate font-medium">{user.displayName}</p>
                       <p className="truncate text-sm text-muted-foreground">
                         {user.email}
                       </p>
@@ -270,11 +257,7 @@ export default function StaffDirectory() {
                   variant="outline"
                   size="sm"
                   onClick={() => setPage((current) => current + 1)}
-                  disabled={
-                    page >= totalPages ||
-                    isLoading ||
-                    totalPages === 0
-                  }
+                  disabled={page >= totalPages || isLoading || totalPages === 0}
                 >
                   Next
                   <ArrowRight />

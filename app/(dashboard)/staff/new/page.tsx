@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+export const instant = false;
+
 export default function AddStaffPage() {
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
