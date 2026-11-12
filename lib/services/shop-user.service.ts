@@ -362,3 +362,76 @@ export async function removeShopUser(
   };
 }
 
+export async function updateShopUserStatus(
+  shopId: string,
+  membershipId: string,
+  status: "ACTIVE" | "SUSPENDED",
+): Promise<ShopUserDetails> {
+  const admin = createAdminClient();
+
+  // Verify the staff membership belongs to this shop.
+  const { data: membership, error: lookupError } = await admin
+    .from("shop_memberships")
+    .select("id, status")
+    .eq("id", membershipId)
+    .eq("shop_id", shopId)
+    .eq("role", "SHOP_USER")
+    .maybeSingle();
+
+  if (lookupError) {
+    console.error("Shop user status lookup failed.");
+
+    throw new ShopUserServiceError(
+      "Unable to retrieve staff membership.",
+      503,
+      "STAFF_STATUS_LOOKUP_FAILED",
+    );
+  }
+
+  if (!membership) {
+    throw new ShopUserServiceError(
+      "Shop User not found.",
+      404,
+      "STAFF_NOT_FOUND",
+    );
+  }
+
+  // Avoid unnecessary database updates.
+  if (membership.status === status) {
+    return getShopUserByMembershipId(shopId, membershipId);
+  }
+
+  // Update only the membership belonging to this shop.
+  const { data: updatedMembership, error: updateError } = await admin
+    .from("shop_memberships")
+    .update({
+      status,
+    })
+    .eq("id", membershipId)
+    .eq("shop_id", shopId)
+    .eq("role", "SHOP_USER")
+    .select("id")
+    .maybeSingle();
+
+  if (updateError) {
+    console.error("Shop user status update failed.");
+
+    throw new ShopUserServiceError(
+      "Unable to update staff status.",
+      503,
+      "STAFF_STATUS_UPDATE_FAILED",
+    );
+  }
+
+  if (!updatedMembership) {
+    throw new ShopUserServiceError(
+      "Shop User not found.",
+      404,
+      "STAFF_NOT_FOUND",
+    );
+  }
+
+  // Return complete updated staff details.
+  return getShopUserByMembershipId(shopId, membershipId);
+}
+

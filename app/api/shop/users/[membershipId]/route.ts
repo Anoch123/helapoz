@@ -10,6 +10,7 @@ import {
   getShopUserByMembershipId,
   removeShopUser,
   ShopUserServiceError,
+  updateShopUserStatus,
 } from "@/lib/services/shop-user.service";
 
 import { validateCsrfRequest } from "@/lib/services/csrf.service";
@@ -116,6 +117,110 @@ export async function GET(
       {
         success: true,
         data: staff,
+      },
+      {
+        status: 200,
+        headers: NO_STORE_HEADERS,
+      },
+    );
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
+
+/**
+ * PATCH /api/shop/users/[membershipId]
+ *
+ * Updates a Shop User's membership status.
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: RouteContext,
+) {
+  try {
+    // Validate CSRF
+    const csrfError = validateCsrfRequest(request);
+
+    if (csrfError) {
+      csrfError.headers.set(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate",
+      );
+      csrfError.headers.set("Pragma", "no-cache");
+
+      return csrfError;
+    }
+
+    // Require authenticated shop context
+    const context = await requireShopContext();
+
+    // Only Shop Admins can update staff status
+    // if (context.membership.role !== "SHOP_ADMIN") {
+    //   return errorResponse(
+    //     "Only Shop Admins can update staff status.",
+    //     "SHOP_ADMIN_REQUIRED",
+    //     403,
+    //   );
+    // }
+
+    const { membershipId } = await params;
+
+    // Validate membership ID
+    if (!isValidUuid(membershipId)) {
+      return errorResponse(
+        "Invalid staff membership ID.",
+        "INVALID_MEMBERSHIP_ID",
+        400,
+      );
+    }
+
+    // Parse request body
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse(
+        "Invalid request body.",
+        "INVALID_REQUEST_BODY",
+        400,
+      );
+    }
+
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      !("status" in body)
+    ) {
+      return errorResponse(
+        "Staff status is required.",
+        "STATUS_REQUIRED",
+        400,
+      );
+    }
+
+    const status = body.status;
+
+    if (status !== "ACTIVE" && status !== "SUSPENDED") {
+      return errorResponse(
+        "Invalid staff status. Allowed values are ACTIVE and SUSPENDED.",
+        "INVALID_STATUS",
+        400,
+      );
+    }
+
+    // Update staff membership status
+    const updatedStaff = await updateShopUserStatus(
+      context.shopId,
+      membershipId,
+      status,
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Staff status updated successfully.",
+        data: updatedStaff,
       },
       {
         status: 200,

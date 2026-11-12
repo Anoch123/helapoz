@@ -12,30 +12,7 @@ import PageLoader from "../widgets/layouts/page-loading";
 import { toAccessRole } from "@/lib/constants/access-roles";
 import { AccessProvider } from "../widgets/auth/access-control";
 import LoginRequiredScreen from "../widgets/auth/login-required-screen";
-
-// Authentication or session problems -> send the user to the login page.
-const LOGIN_REQUIRED_CODES = [
-  "UNAUTHENTICATED",
-  "SHOP_SESSION_MISSING",
-  "INVALID_SHOP_SESSION",
-  "SESSION_USER_MISMATCH",
-];
-
-// Shop, membership, and subscription restrictions -> show the access screen.
-const ACCESS_RESTRICTED_CODES = [
-  "SHOP_SESSION_CHECK_FAILED",
-  "SHOP_UNAVAILABLE",
-  "SHOP_LOOKUP_FAILED",
-  "MEMBERSHIP_INACTIVE",
-  "MEMBERSHIP_LOOKUP_FAILED",
-  "INVALID_MEMBERSHIP_ROLE",
-  "EXPIRED",
-  "PAYMENT_REQUIRED",
-  "SUSPENDED",
-  "CANCELLED",
-  "NO_SUBSCRIPTION",
-  "SUBSCRIPTION_CHECK_FAILED",
-];
+import { ACCESS_RESTRICTED_CODES, LOGIN_REQUIRED_CODES } from "@/lib/constants/helper-constants";
 
 async function CurrentUserContent({ children }: { children: ReactNode }) {
   await connection();

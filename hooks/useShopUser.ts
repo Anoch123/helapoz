@@ -35,6 +35,8 @@ export function useShopUser(membershipId: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRemoving, setIsRemoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const loadUser = useCallback(async (signal: AbortSignal) => {
     setIsLoading(true);
@@ -121,11 +123,107 @@ export function useShopUser(membershipId: string) {
     }
   }, [membershipId]);
 
+  const updateStatus = useCallback(
+    async (status: "ACTIVE" | "SUSPENDED") => {
+      setIsUpdatingStatus(true);
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `/api/shop/users/${membershipId}`,
+          {
+            method: "PATCH",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ status }),
+          },
+        );
+
+        const result =
+          (await response.json()) as ApiResponse<ShopUserDetails>;
+
+        if (!response.ok || !result.success) {
+          throw new Error(
+            result.message ?? "Unable to update staff status.",
+          );
+        }
+
+        if (result.data) {
+          setUser(result.data);
+        }
+
+        return true;
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unable to update staff status.",
+        );
+
+        return false;
+      } finally {
+        setIsUpdatingStatus(false);
+      }
+    },
+    [membershipId],
+  );
+
+  const updatePassword = useCallback(
+    async (status: "ACTIVE" | "SUSPENDED") => {
+      setIsUpdatingStatus(true);
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `/api/shop/users/${membershipId}`,
+          {
+            method: "PATCH",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ status }),
+          },
+        );
+
+        const result =
+          (await response.json()) as ApiResponse<ShopUserDetails>;
+
+        if (!response.ok || !result.success) {
+          throw new Error(
+            result.message ?? "Unable to update staff status.",
+          );
+        }
+
+        if (result.data) {
+          setUser(result.data);
+        }
+
+        return true;
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unable to update staff status.",
+        );
+
+        return false;
+      } finally {
+        setIsUpdatingStatus(false);
+      }
+    },
+    [membershipId],
+  );
+
   return {
     user,
     isLoading,
     isRemoving,
+    isUpdatingStatus,
     error,
     removeUser,
+    updateStatus,
   };
 }

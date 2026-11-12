@@ -373,3 +373,27 @@ export const VARIANTS = {
       "Access to this shop is paused. Your data is safe and nothing has been deleted.",
   },
 } as const;
+
+// Authentication or session problems -> send the user to the login page.
+export const LOGIN_REQUIRED_CODES = [
+  "UNAUTHENTICATED",
+  "SHOP_SESSION_MISSING",
+  "INVALID_SHOP_SESSION",
+  "SESSION_USER_MISMATCH",
+];
+
+// Shop, membership, and subscription restrictions -> show the access screen.
+export const ACCESS_RESTRICTED_CODES = [
+  "SHOP_SESSION_CHECK_FAILED",
+  "SHOP_UNAVAILABLE",
+  "SHOP_LOOKUP_FAILED",
+  "MEMBERSHIP_INACTIVE",
+  "MEMBERSHIP_LOOKUP_FAILED",
+  "INVALID_MEMBERSHIP_ROLE",
+  "EXPIRED",
+  "PAYMENT_REQUIRED",
+  "SUSPENDED",
+  "CANCELLED",
+  "NO_SUBSCRIPTION",
+  "SUBSCRIPTION_CHECK_FAILED",
+];

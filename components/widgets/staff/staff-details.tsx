@@ -2,12 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import {
+  Ban,
   CalendarDays,
+  Loader2,
   Lock,
   Mail,
   Phone,
   ShieldCheck,
   Trash2,
+  UserCheck,
   UserRound,
   Users,
 } from "lucide-react";
@@ -37,7 +40,7 @@ type StaffDetailsProps = {
 export default function StaffDetails({ membershipId }: StaffDetailsProps) {
   const router = useRouter();
 
-  const { user, isLoading, isRemoving, error, removeUser } =
+  const { user, isLoading, isRemoving, error, removeUser, updateStatus, isUpdatingStatus } =
     useShopUser(membershipId);
 
   async function handleRemove() {
@@ -45,6 +48,14 @@ export default function StaffDetails({ membershipId }: StaffDetailsProps) {
 
     if (result) {
       router.push("/staff");
+      router.refresh();
+    }
+  }
+
+  async function handleStatusChange(next: "ACTIVE" | "SUSPENDED") {
+    const result = await updateStatus(next);
+
+    if (result) {
       router.refresh();
     }
   }
@@ -77,6 +88,8 @@ export default function StaffDetails({ membershipId }: StaffDetailsProps) {
       </PageContainer>
     );
   }
+
+  const isSuspended = user.status === "SUSPENDED";
 
   const createdDate = new Intl.DateTimeFormat("en-LK", {
     dateStyle: "long",
@@ -164,6 +177,42 @@ export default function StaffDetails({ membershipId }: StaffDetailsProps) {
                   Manage Permissions
                 </Button>
               </Panel>
+            </Can>
+
+            <Can permissions="staff.status.manage">
+              {isSuspended ? (
+                <Panel
+                  title="Account Suspended"
+                  description="This staff member can't access the shop until you reactivate their account."
+                  padded
+                >
+                  <Button
+                    className="w-full sm:w-auto"
+                    onClick={() => handleStatusChange("ACTIVE")}
+                    disabled={isUpdatingStatus}
+                  >
+                    {isUpdatingStatus ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <UserCheck />
+                    )}
+                    {isUpdatingStatus ? "Reactivating..." : "Reactivate Staff"}
+                  </Button>
+                </Panel>
+              ) : (
+                <ConfirmDanger
+                  title="Suspend Staff Member"
+                  description="Suspending this account blocks the staff member from signing in to this shop. Nothing is deleted."
+                  triggerLabel="Suspend Staff"
+                  question={`Suspend ${user.displayName}?`}
+                  note="They lose access to this shop until you reactivate them."
+                  confirmLabel="Confirm Suspension"
+                  pendingLabel="Suspending..."
+                  loading={isUpdatingStatus}
+                  onConfirm={() => handleStatusChange("SUSPENDED")}
+                  icon={Ban}
+                />
+              )}
             </Can>
 
             {error && <InlineAlert>{error}</InlineAlert>}
