@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Ban,
   CalendarDays,
+  KeyRound,
   Loader2,
-  Lock,
   Mail,
+  Pencil,
   Phone,
   ShieldCheck,
   Trash2,
@@ -16,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import PasswordResetModal from "@/components/models/password-reset";
 import {
   ConfirmDanger,
   DetailGrid,
@@ -40,8 +43,19 @@ type StaffDetailsProps = {
 export default function StaffDetails({ membershipId }: StaffDetailsProps) {
   const router = useRouter();
 
-  const { user, isLoading, isRemoving, error, removeUser, updateStatus, isUpdatingStatus } =
-    useShopUser(membershipId);
+  const {
+    user,
+    isLoading,
+    isRemoving,
+    error,
+    removeUser,
+    updateStatus,
+    isUpdatingStatus,
+    resetPassword,
+    isResettingPassword,
+  } = useShopUser(membershipId);
+
+  const [resetOpen, setResetOpen] = useState(false);
 
   async function handleRemove() {
     const result = await removeUser();
@@ -97,13 +111,31 @@ export default function StaffDetails({ membershipId }: StaffDetailsProps) {
 
   return (
     <PageContainer>
-      <PageHeader
-        backHref="/staff"
-        backLabel="Back to Staff"
-        icon={UserRound}
-        title={user.displayName}
-        description="Shop User"
-      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <PageHeader
+            backHref="/staff"
+            backLabel="Back to Staff"
+            icon={UserRound}
+            title={user.displayName}
+            description="Shop User"
+          />
+        </div>
+
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/staff/${membershipId}/edit`)}
+          >
+            <Pencil />
+            Edit Profile
+          </Button>
+          <Button variant="outline" onClick={() => setResetOpen(true)}>
+            <KeyRound />
+            Reset Password
+          </Button>
+        </div>
+      </div>
 
       <DetailLayout
         main={
@@ -233,6 +265,18 @@ export default function StaffDetails({ membershipId }: StaffDetailsProps) {
             </Can>
           </>
         }
+      />
+
+      <PasswordResetModal
+        open={resetOpen}
+        onOpenChange={setResetOpen}
+        targetName={user.displayName}
+        isSubmitting={isResettingPassword}
+        onSubmit={async (password) => {
+          const result = await resetPassword(password);
+          if (result) router.refresh();
+          return result;
+        }}
       />
     </PageContainer>
   );

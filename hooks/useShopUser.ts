@@ -170,48 +170,36 @@ export function useShopUser(membershipId: string) {
     [membershipId],
   );
 
-  const updatePassword = useCallback(
-    async (status: "ACTIVE" | "SUSPENDED") => {
-      setIsUpdatingStatus(true);
+  const resetPassword = useCallback(
+    async (password: string) => {
+      setIsResettingPassword(true);
       setError(null);
 
       try {
         const response = await fetch(
-          `/api/shop/users/${membershipId}`,
+          `/api/shop/users/${membershipId}/password`,
           {
-            method: "PATCH",
+            method: "POST",
             credentials: "same-origin",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password }),
           },
         );
 
-        const result =
-          (await response.json()) as ApiResponse<ShopUserDetails>;
+        const result = (await response.json()) as ApiResponse<null>;
 
         if (!response.ok || !result.success) {
-          throw new Error(
-            result.message ?? "Unable to update staff status.",
-          );
-        }
-
-        if (result.data) {
-          setUser(result.data);
+          throw new Error(result.message ?? "Unable to reset password.");
         }
 
         return true;
       } catch (error) {
         setError(
-          error instanceof Error
-            ? error.message
-            : "Unable to update staff status.",
+          error instanceof Error ? error.message : "Unable to reset password.",
         );
-
         return false;
       } finally {
-        setIsUpdatingStatus(false);
+        setIsResettingPassword(false);
       }
     },
     [membershipId],
@@ -222,8 +210,10 @@ export function useShopUser(membershipId: string) {
     isLoading,
     isRemoving,
     isUpdatingStatus,
+    isResettingPassword,
     error,
     removeUser,
     updateStatus,
+    resetPassword,
   };
 }
